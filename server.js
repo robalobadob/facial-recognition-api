@@ -19,36 +19,8 @@ const app = express();
 app.use(express.urlencoded({extended: false}));
 app.use(express.json());
 
-const database = {
-    users: [
-        {
-            id: '123',
-            name: 'John',
-            password: 'cookies',
-            email: 'john@email.com',
-            entries: 0,
-            joined: new Date()
-        },
-        {
-            id: '124',
-            name: 'Sally',
-            password: 'bananas',
-            email: 'sally@gmail.com',
-            entries: 0,
-            joined: new Date()
-        }
-    ],
-    login: [
-        {
-            id: '987',
-            hash: '',
-            email: 'john@email.com'
-        }
-    ]
-}
-
 app.get('/', (req, res)=> {
-    res.send(database.users);
+    res.send('success');
 })
 
 app.use(cors({
@@ -65,41 +37,49 @@ console.log('CORS-enabled web server listening on port 80')
 })
 
 app.post('/signin', (req, res) => {
-    //bcryptjs -- to check a password
-    // Load hash from your password DB.
-    bcrypt.compare("cookies", '$2a$10$FROJTxXZDHe3DBMAi819kebeLDepAoxVQXx5clv.Qmjw41Vb8XvUa').then((res) => {
-        console.log('first guess', res)
-    });
-    bcrypt.compare("not_bacon", '$2a$10$FROJTxXZDHe3DBMAi819kebeLDepAoxVQXx5clv.Qmjw41Vb8XvUa', function(err, res) {
-        console.log('second guess', res)
-    });
-    if (req.body.email === database.users[0].email &&
-        req.body.password === database.users[0].password) {
-        res.json(database.users[0]);
-    } else {
-        res.status(400).json('error logging in');
-    }
+    db.select('email', 'hash').from('login')
+        .where('email', '=', req.body.email)
+        .then(data => {
+            const isValid = bcrypt.compareSync(req.body.password, data[0].hash);
+            if (isValid) {
+                return db.select('*').from('users')
+                    .where('email', '=', req.body.email)
+                    .then(user => {
+                        res.json(user[0])
+                    })
+                    .catch(err => res.status(400).json('unable to get user'))
+            } else {
+                res.status(400).json('wrong credentials')
+            }
+        })
+        .catch(err => res.status(400).json('wrong credentials'))
 })
 
 app.post('/register', (req, res) => {
     const { email, name, password } = req.body;
-    // bcryptjs
-    // to hash a password
-    var bcrypt = require('bcryptjs');
-    bcrypt.genSalt(10, function(err, salt) {
-    bcrypt.hash(password, salt, function(err, hash) {
-        console.log(hash);
-    });
-});
-    db('users')
-        .returning('*')
-        .insert({
-        email: email,
-        name: name,
-        joined: new Date()
-    })
-        .then(user => {
-            res.json(user[0]);
+    const salt = bcrypt.genSaltSync(10);
+    const hash = bcrypt.hashSync(password, salt);
+        db.transaction(trx => {
+            trx.insert({
+                hash: hash,
+                email: email,
+            })
+            .into('login')
+            .returning('email')
+            .then(loginEmail => {
+                return trx('users')
+                    .returning('*')
+                    .insert({
+                        email: loginEmail[0].email,
+                        name: name,
+                        joined: new Date()
+                    })
+                    .then(user => {
+                        res.json(user[0]);
+                    })
+            })
+            .then(trx.commit)
+            .catch(trx.rollback)
         })
         .catch(err => res.status(400).json('unable to register'))
 })
