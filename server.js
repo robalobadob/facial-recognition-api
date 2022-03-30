@@ -12,7 +12,7 @@ const db = knex({
     client: 'pg',
     connection: {
       connectionString : process.env.DATABASE_URL,
-      ssl: true
+      ssl: true,
     }
   });
 
@@ -33,4 +33,6 @@ let port = process.env.PORT;
 if (port == null || port == "") {
   port = 3000;
 }
-app.listen(port);
+app.listen(port, () => {
+  console.log('app is running on port $port')
+});
