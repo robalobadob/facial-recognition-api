@@ -12,11 +12,8 @@ const db = knex({
     client: 'pg',
     connection: {
       connectionString:
-        process.env.DATABASE_URL || 
-        'postgres://shnnugdcxvvhhq:14b1d88f1ad515c1655f48364e2e758920d195b9455134158c5d43a1b3effcfe@ec2-52-2-245-64.compute-1.amazonaws.com:5432/de7956p3gpaqrh',
-      ssl: {
-        rejectUnauthorized: true,
-      },
+        process.env.DATABASE_URL || "postgres://shnnugdcxvvhhq:14b1d88f1ad515c1655f48364e2e758920d195b9455134158c5d43a1b3effcfe@ec2-52-2-245-64.compute-1.amazonaws.com:5432/de7956p3gpaqrh",
+        ssl: { rejectUnauthorized: false },
     },
   });
 
