@@ -14,7 +14,7 @@ const db = knex({
       connectionString:
         process.env.DATABASE_URL || "postgres://shnnugdcxvvhhq:14b1d88f1ad515c1655f48364e2e758920d195b9455134158c5d43a1b3effcfe@ec2-52-2-245-64.compute-1.amazonaws.com:5432/de7956p3gpaqrh",
         ssl: { rejectUnauthorized: false },
-    },
+    }
   });
 
 const app = express();
@@ -35,5 +35,5 @@ if (port == null || port == "") {
   port = 3000;
 }
 app.listen(port, () => {
-  console.log('app is running on port $port')
+  console.log(`app is running on port $port`)
 });
