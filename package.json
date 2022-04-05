@@ -8,6 +8,7 @@
     "start:dev": "nodemon server.js"
   },
   "keywords": [],
+  "proxy": "https://stormy-scrubland-95745.herokuapp.com/",
   "author": "",
   "license": "ISC",
   "dependencies": {
