@@ -13,9 +13,7 @@ const db = knex({
     connection: { 
       connectionString:
         process.env.DATABASE_URL,
-        ssl: {
-          rejectUnauthorized: false
-        }
+        ssl: true
     }
   });
 
