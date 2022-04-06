@@ -20,7 +20,7 @@ const db = knex({
 const app = express();
 
 var corsOptions = {
-  origin: 'http://localhost:3001/',
+  origin: 'https://stormy-scrubland-95745.herokuapp.com/',
   optionsSuccessStatus: 200
 }
 
